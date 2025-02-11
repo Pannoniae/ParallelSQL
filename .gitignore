@@ -1,6 +1,6 @@
 # Custom ignores
 db/
-
+gradle.properties
 
 .gradle
 build/
