@@ -3,18 +3,91 @@ plugins {
 }
 
 group = 'net.pannoniae'
-version = '1.0-SNAPSHOT'
+version = '1.0'
+
+String propertyFileName = "gradle.properties"
+File propsFile = new File(propertyFileName)
+Properties props = new Properties()
+props.load(propsFile.newDataInputStream())
 
 repositories {
     mavenCentral()
+    maven { // to download the jonkerridge.groovy_jcsp library
+        name = "GitHubPackages"
+        url = "https://maven.pkg.github.com/JonKerridge/groovyJCSP"
+        credentials {
+            username = props.getProperty("gpr.user")
+            password = props.getProperty("gpr.key")
+        }
+    }
+    maven { // to download the cspforjava.jcsp library
+        name = "GitHubPackages"
+        url = "https://maven.pkg.github.com/CSPforJAVA/jcsp"
+        credentials {
+            username = props.getProperty("gpr.user")
+            password = props.getProperty("gpr.key")
+        }
+    }
+
+    maven { // to download the cli_cluster_library library
+        name = "GitHubPackages"
+        url = "https://maven.pkg.github.com/JonKerridge/cluster_cli"
+        credentials {
+            username = props.getProperty("gpr.user")
+            password = props.getProperty("gpr.key")
+        }
+    }
 }
 
 dependencies {
-    implementation 'org.apache.groovy:groovy:4.0.14'
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'org.codehaus.groovy:groovy-all:3.0.22'
+    implementation 'cspforjava:jcsp:1.1.10'
+    implementation 'jonkerridge:groovy_jcsp:1.1.10'
+    implementation 'jonkerridge:cluster_cli:1.0.10'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation 'org.xerial:sqlite-jdbc:3.47.0.0'
 }
 
 test {
     useJUnitPlatform()
 }
+
+def jarConfigurations = [
+        [
+                className: 'net.pannoniae.Stats',
+                jarName: 'stats'
+        ],
+        [
+                className: 'net.pannoniae.SQL',
+                jarName: 'SQL'
+        ]
+]
+
+jarConfigurations.each { config ->
+    tasks.register("${config.jarName}Jar", Jar) {
+        archiveBaseName = config.jarName
+
+        from sourceSets.main.output
+
+        manifest {
+            attributes(
+                    'Main-Class': config.className
+            )
+        }
+
+        from {
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+}
+
+tasks.register('buildCustomJars') {
+    dependsOn tasks.withType(Jar).matching {
+        it.name.endsWith('Jar') && it.name != 'jar'
+    }
+}
+
+build.dependsOn buildCustomJars

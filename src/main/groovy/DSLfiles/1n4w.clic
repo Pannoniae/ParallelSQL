@@ -1,0 +1,4 @@
+version 1.0.10
+emit -n 1 -w 1 -p int,int!1,1
+work -n 1 -w 4 -m load
+collect -n 1 -w 1

@@ -1,0 +1,8 @@
+region.tbl;5
+partsupp.tbl;800000
+nation.tbl;25
+lineitem.tbl;6001215
+part.tbl;200000
+customer.tbl;150000
+supplier.tbl;10000
+orders.tbl;1500000
