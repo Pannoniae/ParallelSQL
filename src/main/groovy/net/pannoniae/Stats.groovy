@@ -1,8 +1,11 @@
 package net.pannoniae
 
 class Stats {
+
+    static final String PATH = System.getenv("DB_DIR") != null ? System.getenv("DB_DIR") : "/home/pannoniae/sch/HPC/ParallelSQL/db/"
+
     static void main(String[] args) {
-        def src = args.length > 0 ? args[0] : "/home/pannoniae/sch/HPC/ParallelSQL/db/"
+        def src = args.length > 0 ? args[0] : PATH
 
         println partition(counts(src), 4)
     }
@@ -33,7 +36,7 @@ class Stats {
         return result
     }
 
-    static List<String> partition(Map<String, Long> lineCounts, int nodes) {
+    static List<List<String>> partition(Map<String, Long> lineCounts, int nodes) {
         var data = lineCounts.collect { name, size ->
             [name: name, size: size]
         }.sort { -it.size }
@@ -46,11 +49,7 @@ class Stats {
             parts[min] << f.name
             sizes[min] += f.size
         }
-
-        List<String> result = []
-        parts.eachWithIndex { part, i ->
-            result << "Node ${i + 1}: ${part.join(', ')}"
-        }
+        return parts
 
     }
 }
