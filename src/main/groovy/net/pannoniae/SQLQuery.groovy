@@ -8,7 +8,7 @@ import groovy.transform.CompileStatic
 // The flow goes like this: first we distribute the work (by splitting it up at least somewhat equally)
 // We get 1 worker per table at least
 // Then, each worker loads their table into an SQLite database and writes it onto the shared disk
-class SQLImport implements EmitInterface<SQLImport>, Serializable {
+class SQLQuery implements EmitInterface<SQLQuery>, Serializable {
 
     int nodes, workers, total
     int i = 0
@@ -17,7 +17,7 @@ class SQLImport implements EmitInterface<SQLImport>, Serializable {
     List<List<String>> stats
 
     // used by cluster-cli for the parameter passing
-    public SQLImport(List l) {
+    public SQLQuery(List l) {
         nodes = l[0] as int
         workers = l[1] as int
         total = nodes * workers
@@ -26,7 +26,7 @@ class SQLImport implements EmitInterface<SQLImport>, Serializable {
     }
 
     // actual constructor (used by create)
-    public SQLImport(List<List<String>> stats, int nodes, int workers, int i) {
+    public SQLQuery(List<List<String>> stats, int nodes, int workers, int i) {
         this.stats = stats
         this.nodes = nodes
         this.workers = workers
@@ -34,11 +34,11 @@ class SQLImport implements EmitInterface<SQLImport>, Serializable {
     }
 
     @Override
-    SQLImport create() {
+    SQLQuery create() {
         if (i >= total) {
             return null
         } else {
-            var inst = new SQLImport(stats, nodes, workers, i)
+            var inst = new SQLQuery(stats, nodes, workers, i)
             i++
             return inst
         }

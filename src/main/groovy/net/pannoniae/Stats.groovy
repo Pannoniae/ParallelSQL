@@ -1,13 +1,24 @@
 package net.pannoniae
 
+import java.nio.file.Path
+
 class Stats {
 
-    static final String PATH = System.getenv("DB_DIR") != null ? System.getenv("DB_DIR") : "/home/pannoniae/sch/HPC/ParallelSQL/db/"
+    static final String PATH = System.getenv("PARALLELSQL_DIR") != null ?
+            System.getenv("PARALLELSQL_DIR") + "/db/" :
+            "/home/pannoniae/sch/HPC/ParallelSQL/db/"
+    static final String QUERIES_PATH = System.getenv("PARALLELSQL_DIR") != null ?
+            System.getenv("PARALLELSQL_DIR") + "/queries/" :
+            "/home/pannoniae/sch/HPC/ParallelSQL/queries/"
 
     static void main(String[] args) {
         def src = args.length > 0 ? args[0] : PATH
 
+        println partition(counts(src), 1)
+        println partition(counts(src), 2)
         println partition(counts(src), 4)
+        println partition(counts(src), 8)
+        println partition(counts(src), 16)
     }
 
 

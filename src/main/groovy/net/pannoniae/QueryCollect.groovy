@@ -2,18 +2,18 @@ package net.pannoniae
 
 import cluster_cli.records.CollectInterface
 
-class SQLCollect implements CollectInterface<SQLImport> {
+class QueryCollect implements CollectInterface<SQLQuery> {
 
-    SQLCollect(List d) {
+    QueryCollect(List d) {
         //println "collecting"
     }
 
-    SQLCollect() {
+    QueryCollect() {
         //println "collecting2"
     }
 
     @Override
-    void collate(SQLImport sql, List params) {
+    void collate(SQLQuery sql, List params) {
         //println "collecting3"
     }
 

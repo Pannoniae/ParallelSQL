@@ -194,6 +194,21 @@ create table LINEITEM (
     static String jmOff = "PRAGMA journal_mode = OFF"
     static String synch = "PRAGMA synchronous = 0"
     static String cache = "PRAGMA cache_size = 1000000"
+    // 16k pages
+    static String page = "PRAGMA page_size = 16384"
     static String lock = "PRAGMA locking_mode = EXCLUSIVE"
     static String temp = "PRAGMA temp_store = MEMORY"
+
+    static var queries = [:]
+
+    // load queries from /queries
+    static {
+        new File(Stats.QUERIES_PATH).eachFile { File f ->
+            if (f.name.endsWith(".sql")) {
+                queries[f.name - ".sql"] = f.text
+            }
+        }
+        println("Loaded ${queries.size()} queries")
+
+    }
 }

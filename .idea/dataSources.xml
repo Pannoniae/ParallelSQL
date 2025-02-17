@@ -14,7 +14,7 @@
       </libraries>
     </data-source>
     <data-source source="LOCAL" name="orders" uuid="98e1e64d-e314-4038-8874-cf53e0fa0c3e">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>099ffecf-2a6b-4b1b-a66c-b357a802b4ed</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/db/orders.db</jdbc-url>
@@ -32,7 +32,7 @@
       </libraries>
     </data-source>
     <data-source source="LOCAL" name="lineitem" uuid="1076d326-62f0-4b0a-b58c-5b9f5d58e2fc">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>099ffecf-2a6b-4b1b-a66c-b357a802b4ed</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/db/lineitem.db</jdbc-url>
@@ -50,7 +50,7 @@
       </libraries>
     </data-source>
     <data-source source="LOCAL" name="partsupp" uuid="cbd57397-80cc-443e-8776-4197c81dafc2">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>099ffecf-2a6b-4b1b-a66c-b357a802b4ed</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/db/partsupp.db</jdbc-url>
