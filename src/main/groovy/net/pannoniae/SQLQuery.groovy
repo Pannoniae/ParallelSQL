@@ -13,21 +13,28 @@ class SQLQuery implements EmitInterface<SQLQuery>, Serializable {
     int nodes, workers, total
     int i = 0
 
-    // index to table
-    List<List<String>> stats
+    // partitioned queries
+    List<List<Integer>> queries
 
     // used by cluster-cli for the parameter passing
     public SQLQuery(List l) {
         nodes = l[0] as int
         workers = l[1] as int
         total = nodes * workers
-        stats = Stats.partition(Stats.counts(Stats.PATH), total)
-        println "stats: " + stats
+        // queries (total number: 19)
+        // query 17, 20 and 22 are very long, skip
+        List<Integer> work = (1..22).findAll { it != 17 && it != 20 && it != 22 } as List<Integer>
+
+        println("work: " + work)
+        queries = Stats.partition(work, total)
+        println "queries: " + queries
+        println "" + queries.getClass() + " " + queries.get(0).getClass()
+
     }
 
     // actual constructor (used by create)
-    public SQLQuery(List<List<String>> stats, int nodes, int workers, int i) {
-        this.stats = stats
+    public SQLQuery(List<List<Integer>> queries, int nodes, int workers, int i) {
+        this.queries = queries
         this.nodes = nodes
         this.workers = workers
         this.i = i
@@ -38,144 +45,71 @@ class SQLQuery implements EmitInterface<SQLQuery>, Serializable {
         if (i >= total) {
             return null
         } else {
-            var inst = new SQLQuery(stats, nodes, workers, i)
+            println "i: " + i
+            var inst = new SQLQuery(queries, nodes, workers, i)
             i++
             return inst
         }
     }
 
-    void load(List p) {
-        println " idx:" + i
+    void query(List p) {
+        //println " idx:" + i
         // if empty, we're done
-        if (stats[i].size() == 0) {
+        if (queries[i].size() == 0) {
             return
         }
         long startTime = System.currentTimeSeconds()
+        println(Constants.tables.keySet())
 
-        // for each table, load the data
-        for (String table : stats[i]) {
-
-            // load the table
-            // the db name is the table name with the extension changed to .db
-            String basename = table.split("\\.")[0]
-            String dbname = basename + ".db"
-            println dbname
-
-            Sql db = Sql.newInstance("jdbc:sqlite:" + Stats.PATH + dbname)
-            // needs to be executed first?
-            //db.execute(Constants.cache)
-
-            db.execute(Constants.jmOff)
-            db.execute(Constants.synch)
-            db.execute(Constants.lock)
-            db.execute(Constants.temp)
-
-            db.cacheStatements = true
-
-            // execute create table
-            db.execute(Constants.tables[basename].drop)
-            db.execute(Constants.tables[basename].create)
-
-            // load the data
-            loadData(db, table)
-
-            db.close()
+        // create db in memory
+        def sql = Sql.newInstance("jdbc:sqlite::memory:", "org.sqlite.JDBC")
+        // attach all databases in the db folder to the in-memory db
+        var ctr = 0
+        Constants.tables.keySet().each { table ->
+            sql.execute("ATTACH DATABASE ? AS ?", ["${Stats.PATH}${table}.db", table])
+            ctr++
         }
-        long endTime = System.currentTimeSeconds()
-        println "\nElapsed time = ${endTime - startTime} seconds"
-    }
+        println("Attached $ctr databases")
 
-    @CompileStatic
-    static void loadData(Sql db, String table) {
-        String basename = table.split("\\.")[0]
-        File f = new File(Stats.PATH + table)
-        int batchSize = 16384
-        List<String> tokens
+        //def q = 1
 
-        db.withTransaction {
-            switch (basename) {
-                case "region":
-                    db.withBatch(batchSize, Constants.insertRegion) { BatchingPreparedStatementWrapper ps ->
-                        f.eachLine { String line ->
-                            tokens = line.tokenize('|')
-                            ps.addBatch(Integer.parseInt(tokens[0]), tokens[1], tokens[2])
-                        }
-                    }
-                    break
-                case "nation":
-                    db.withBatch(batchSize, Constants.insertNation) { BatchingPreparedStatementWrapper ps ->
-                        f.eachLine { String line ->
-                            tokens = line.tokenize('|')
-                            ps.addBatch(Integer.parseInt(tokens[0]), tokens[1],
-                                    Integer.parseInt(tokens[2]), tokens[3])
-                        }
-                    }
-                    break
-                case "supplier":
-                    db.withBatch(batchSize, Constants.insertSupplier) { BatchingPreparedStatementWrapper ps ->
-                        f.eachLine { String line ->
-                            tokens = line.tokenize('|')
-                            ps.addBatch(Integer.parseInt(tokens[0]), tokens[1], tokens[2],
-                                    Integer.parseInt(tokens[3]), tokens[4],
-                                    Double.parseDouble(tokens[5]), tokens[6])
-                        }
-                    }
-                    break
-                case "part":
-                    db.withBatch(batchSize, Constants.insertPart) { BatchingPreparedStatementWrapper ps ->
-                        f.eachLine { String line ->
-                            tokens = line.tokenize('|')
-                            ps.addBatch(Integer.parseInt(tokens[0]), tokens[1], tokens[2],
-                                    tokens[3], tokens[4], Integer.parseInt(tokens[5]),
-                                    tokens[6], Double.parseDouble(tokens[7]), tokens[8])
-                        }
-                    }
-                    break
-                case "customer":
-                    db.withBatch(batchSize, Constants.insertCustomer) { BatchingPreparedStatementWrapper ps ->
-                        f.eachLine { String line ->
-                            tokens = line.tokenize('|')
-                            ps.addBatch(Integer.parseInt(tokens[0]), tokens[1], tokens[2],
-                                    Integer.parseInt(tokens[3]), tokens[4],
-                                    Double.parseDouble(tokens[5]), tokens[6], tokens[7])
-                        }
-                    }
-                    break
-                case "partsupp":
-                    db.withBatch(batchSize, Constants.insertPartSupp) { BatchingPreparedStatementWrapper ps ->
-                        f.eachLine { String line ->
-                            tokens = line.tokenize('|')
-                            ps.addBatch(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]),
-                                    Integer.parseInt(tokens[2]), Double.parseDouble(tokens[3]),
-                                    tokens[4])
-                        }
-                    }
-                    break
-                case "lineitem":
-                    db.withBatch(batchSize, Constants.insertLineItem) { BatchingPreparedStatementWrapper ps ->
-                        f.eachLine { String line ->
-                            tokens = line.tokenize('|')
-                            ps.addBatch(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]),
-                                    Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]),
-                                    Double.parseDouble(tokens[4]), Double.parseDouble(tokens[5]),
-                                    Double.parseDouble(tokens[6]), Double.parseDouble(tokens[7]),
-                                    tokens[8], tokens[9], tokens[10], tokens[11], tokens[12],
-                                    tokens[13], tokens[14], tokens[15])
-                        }
-                    }
-                    break
-                case "orders":
-                    db.withBatch(batchSize, Constants.insertOrders) { BatchingPreparedStatementWrapper ps ->
-                        f.eachLine { String line ->
-                            tokens = line.tokenize('|')
-                            ps.addBatch(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]),
-                                    tokens[2], Double.parseDouble(tokens[3]), tokens[4],
-                                    tokens[5], tokens[6], Integer.parseInt(tokens[7]), tokens[8])
-                        }
-                    }
-                    break
+        // execute the queries for this worker
+        queries[i].each { q ->
+            def query = Constants.queries[q]
+
+            def results
+            if (q.toInteger() == 15) {
+                // there are 2 statements in this query, we need the result of the second
+                def statements = query.split(";").collect(it -> it + ";")
+                sql.execute(statements[0]) // view
+                results = sql.rows(statements[1])
+            } else {
+                results = sql.rows(query)
             }
-        }
-    }
-}
+            println "q: " + q
+            println "results: " + results.size()
 
+            // print results (somewhat formatted)
+            // also don't display scientific, display normal numbers
+            /*results.each { row ->
+                row.each { k, v ->
+                    print "$k: "
+                    if (v instanceof Double) {
+                        println String.format("%.2f", v)
+                    } else {
+                        println v
+                    }
+                }
+                println ""
+            }*/
+            long endTime = System.currentTimeSeconds()
+            println "\nElapsed time = ${endTime - startTime} seconds (query)"
+        }
+        // close the db
+        sql.close()
+
+        long endTime = System.currentTimeSeconds()
+        println "\nElapsed time = ${endTime - startTime} seconds (node)"
+    }
+
+}

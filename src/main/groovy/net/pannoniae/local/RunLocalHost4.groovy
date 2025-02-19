@@ -1,15 +1,21 @@
 package net.pannoniae.local
 
 import cluster_cli.run.HostRun
+import net.pannoniae.QueryCollect
 import net.pannoniae.SQLCollect
 import net.pannoniae.SQLImport
+import net.pannoniae.SQLQuery
 
 class RunLocalHost4 {
   static void main(String[] args) {
-    String structureFile = System.getProperty("user.dir") + "/src/main/groovy/DSLfiles/2n4w"
-    Class  emitClass = SQLImport
-    Class collectClass = SQLCollect
-    new HostRun(structureFile, emitClass, collectClass, "Local").invoke()
+    String structureFileLoad = System.getProperty("user.dir") + "/src/main/groovy/DSLfiles/load2n4w"
+    String structureFileQuery = System.getProperty("user.dir") + "/src/main/groovy/DSLfiles/query2n4w"
+    Class emitClassLoad = SQLImport
+    Class collectClassLoad = SQLCollect
+    Class emitClassQuery = SQLQuery
+    Class collectClassQuery = QueryCollect
+    new HostRun(structureFileLoad, emitClassLoad, collectClassLoad, "Local").invoke()
+    println "----------------------"
+    new HostRun(structureFileQuery, emitClassQuery, collectClassQuery, "Local").invoke()
   }
-
 }

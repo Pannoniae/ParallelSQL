@@ -4,9 +4,16 @@ import java.nio.file.Path
 
 class Stats {
 
+    /*
+    * The path to the database files (DON'T HAVE A TRAILING SLASH IN THE ENV VAR, IT WON'T WORK)
+     */
     static final String PATH = System.getenv("PARALLELSQL_DIR") != null ?
             System.getenv("PARALLELSQL_DIR") + "/db/" :
             "/home/pannoniae/sch/HPC/ParallelSQL/db/"
+
+    /*
+    * The path to the query files (DON'T HAVE A TRAILING SLASH IN THE ENV VAR, IT WON'T WORK)
+     */
     static final String QUERIES_PATH = System.getenv("PARALLELSQL_DIR") != null ?
             System.getenv("PARALLELSQL_DIR") + "/queries/" :
             "/home/pannoniae/sch/HPC/ParallelSQL/queries/"
@@ -62,5 +69,16 @@ class Stats {
         }
         return parts
 
+    }
+
+    /**
+     * Partition the work into the given number of nodes
+     */
+    static <T> List<List<T>> partition(List<T> work, int nodes) {
+        var parts = (0..<nodes).collect { [] }
+        work.eachWithIndex { w, i ->
+            parts[i % nodes] << w
+        }
+        return parts
     }
 }

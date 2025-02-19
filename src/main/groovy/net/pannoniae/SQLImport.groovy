@@ -4,6 +4,7 @@ import cluster_cli.records.EmitInterface
 import groovy.sql.BatchingPreparedStatementWrapper
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
+import org.sqlite.SQLiteException
 
 // The flow goes like this: first we distribute the work (by splitting it up at least somewhat equally)
 // We get 1 worker per table at least
@@ -23,6 +24,7 @@ class SQLImport implements EmitInterface<SQLImport>, Serializable {
         total = nodes * workers
         stats = Stats.partition(Stats.counts(Stats.PATH), total)
         println "stats: " + stats
+        println "" + stats.getClass() + " " + stats.get(0).getClass()
     }
 
     // actual constructor (used by create)

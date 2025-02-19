@@ -199,13 +199,13 @@ create table LINEITEM (
     static String lock = "PRAGMA locking_mode = EXCLUSIVE"
     static String temp = "PRAGMA temp_store = MEMORY"
 
-    static var queries = [:]
+    static LinkedHashMap<Integer, String> queries = [:]
 
     // load queries from /queries
     static {
         new File(Stats.QUERIES_PATH).eachFile { File f ->
             if (f.name.endsWith(".sql")) {
-                queries[f.name - ".sql"] = f.text
+                queries[(f.name - ".sql").toInteger()] = f.text
             }
         }
         println("Loaded ${queries.size()} queries")
