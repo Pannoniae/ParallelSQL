@@ -16,6 +16,8 @@ class SQLQuery implements EmitInterface<SQLQuery>, Serializable {
     // partitioned queries
     List<List<Integer>> queries
 
+    int totalResults = 0
+
     // used by cluster-cli for the parameter passing
     public SQLQuery(List l) {
         nodes = l[0] as int
@@ -25,10 +27,10 @@ class SQLQuery implements EmitInterface<SQLQuery>, Serializable {
         // query 17, 20 and 22 are very long, skip
         List<Integer> work = (1..22).findAll { it != 17 && it != 20 && it != 22 } as List<Integer>
 
-        println("work: " + work)
+        //println("work: " + work)
         queries = Stats.partition(work, total)
-        println "queries: " + queries
-        println "" + queries.getClass() + " " + queries.get(0).getClass()
+        //println "queries: " + queries
+        //println "" + queries.getClass() + " " + queries.get(0).getClass()
 
     }
 
@@ -45,7 +47,7 @@ class SQLQuery implements EmitInterface<SQLQuery>, Serializable {
         if (i >= total) {
             return null
         } else {
-            println "i: " + i
+            //println "i: " + i
             var inst = new SQLQuery(queries, nodes, workers, i)
             i++
             return inst
@@ -88,6 +90,7 @@ class SQLQuery implements EmitInterface<SQLQuery>, Serializable {
             }
             println "q: " + q
             println "results: " + results.size()
+            totalResults += results.size()
 
             // print results (somewhat formatted)
             // also don't display scientific, display normal numbers

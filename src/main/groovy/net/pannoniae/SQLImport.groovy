@@ -23,8 +23,16 @@ class SQLImport implements EmitInterface<SQLImport>, Serializable {
         workers = l[1] as int
         total = nodes * workers
         stats = Stats.partition(Stats.counts(Stats.PATH), total)
-        println "stats: " + stats
-        println "" + stats.getClass() + " " + stats.get(0).getClass()
+        //println "stats: " + stats
+        //println "" + stats.getClass() + " " + stats.get(0).getClass()
+
+        // delete db files before doing anything
+        Constants.tables.keySet().each { table ->
+            def file = new File("${Stats.PATH}${table}.db")
+            if (file.exists()) {
+                file.delete()
+            }
+        }
     }
 
     // actual constructor (used by create)
@@ -47,7 +55,7 @@ class SQLImport implements EmitInterface<SQLImport>, Serializable {
     }
 
     void load(List p) {
-        println " idx:" + i
+        //println " idx:" + i
         // if empty, we're done
         if (stats[i].size() == 0) {
             return
@@ -61,7 +69,7 @@ class SQLImport implements EmitInterface<SQLImport>, Serializable {
             // the db name is the table name with the extension changed to .db
             String basename = table.split("\\.")[0]
             String dbname = basename + ".db"
-            println dbname
+            //println dbname
 
             Sql db = Sql.newInstance("jdbc:sqlite:" + Stats.PATH + dbname)
             // needs to be executed first?

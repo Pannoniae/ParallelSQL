@@ -1,0 +1,4 @@
+version 1.0.10
+emit -n 1 -w 1 -p int,int!3,4
+work -n 3 -w 4 -m query
+collect -n 1 -w 1

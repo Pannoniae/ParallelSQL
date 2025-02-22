@@ -208,7 +208,7 @@ create table LINEITEM (
                 queries[(f.name - ".sql").toInteger()] = f.text
             }
         }
-        println("Loaded ${queries.size()} queries")
+        //println("Loaded ${queries.size()} queries")
 
     }
 }

@@ -47,11 +47,15 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     implementation 'org.xerial:sqlite-jdbc:3.47.0.0'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
 }
 
 test {
     useJUnitPlatform()
 }
+
+def outputDir = "$projectDir/../ParallelSQL_build"
+def jarsDir = "$buildDir/jars"
 
 def jarConfigurations = [
         [
@@ -59,14 +63,31 @@ def jarConfigurations = [
                 jarName: 'stats'
         ],
         [
-                className: 'net.pannoniae.SQL',
-                jarName: 'SQL'
+                className: 'net.pannoniae.SeqLoad',
+                jarName: 'SeqLoad'
+        ],
+        [
+                className: 'net.pannoniae.SeqQuery',
+                jarName: 'SeqQuery'
+        ],
+        [
+                className: 'net.pannoniae.invoke.NetHostLoad',
+                jarName: 'NetHostLoad'
+        ],
+        [
+                className: 'net.pannoniae.invoke.NetHostQuery',
+                jarName: 'NetHostQuery'
+        ],
+        [
+                className: 'net.pannoniae.invoke.NetNode',
+                jarName: 'NetNode'
         ]
 ]
 
 jarConfigurations.each { config ->
     tasks.register("${config.jarName}Jar", Jar) {
         archiveBaseName = config.jarName
+        destinationDirectory = file(jarsDir)
 
         from sourceSets.main.output
 
@@ -84,10 +105,26 @@ jarConfigurations.each { config ->
     }
 }
 
-tasks.register('buildCustomJars') {
-    dependsOn tasks.withType(Jar).matching {
-        it.name.endsWith('Jar') && it.name != 'jar'
-    }
+tasks.register('buildJars') {
+    dependsOn tasks.withType(Jar).matching { it.name.endsWith('Jar') && it.name != 'jar' }
 }
 
-build.dependsOn buildCustomJars
+tasks.register('cleanDist', Delete) {
+    delete outputDir
+}
+
+
+tasks.register('copyToOutput', Copy) {
+    dependsOn buildJars
+    from(jarsDir)
+    from('db') { into 'db' }
+    from('queries') { into 'queries' }
+    from('src/main/groovy/DSLfiles') { into 'DSLfiles' }
+    into outputDir
+}
+
+tasks.register('buildCustomJars') {
+    dependsOn build
+    dependsOn cleanDist
+    finalizedBy copyToOutput
+}

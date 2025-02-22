@@ -4,6 +4,8 @@ import cluster_cli.records.CollectInterface
 
 class QueryCollect implements CollectInterface<SQLQuery> {
 
+    int totalResults = 0
+
     QueryCollect(List d) {
         //println "collecting"
     }
@@ -14,11 +16,11 @@ class QueryCollect implements CollectInterface<SQLQuery> {
 
     @Override
     void collate(SQLQuery sql, List params) {
-        //println "collecting3"
+        totalResults += sql.totalResults
     }
 
     @Override
     void finalise(List l) {
-        //println "collecting4"
+        println "Total rows = $totalResults"
     }
 }

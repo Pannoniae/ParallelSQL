@@ -1,0 +1,36 @@
+type= version, host= null, version = 1.0.10,   
+	nodes= 0, workers= 0, 
+	fixed IPs= [] 
+	emitParams= []
+	work method= null, work params=[], 
+	collect params= [],
+	finalise params= [],
+	outFile= null,
+	allocIps= []
+type= emit, host= null, version = 1.0.10,   
+	nodes= 1, workers= 1, 
+	fixed IPs= [] 
+	emitParams= [[int, int], [1, 2]]
+	work method= null, work params=[], 
+	collect params= [],
+	finalise params= [],
+	outFile= null,
+	allocIps= []
+type= work, host= null, version = 1.0.10,   
+	nodes= 1, workers= 2, 
+	fixed IPs= [] 
+	emitParams= []
+	work method= load, work params=[], 
+	collect params= [],
+	finalise params= [],
+	outFile= null,
+	allocIps= []
+type= collect, host= null, version = 1.0.10,   
+	nodes= 1, workers= 1, 
+	fixed IPs= [] 
+	emitParams= []
+	work method= null, work params=[], 
+	collect params= [],
+	finalise params= [],
+	outFile= null,
+	allocIps= []
