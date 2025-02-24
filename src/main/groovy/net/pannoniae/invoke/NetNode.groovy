@@ -5,11 +5,23 @@ import jcsp.userIO.Ask
 
 class NetNode {
     static void main(String[] args) {
-        String hostIP
-        if (args.size() == 0)
+        String hostIP = null
+        String nodeIP = null
+        if (args.size() == 0) {
             hostIP = Ask.string("Host IP address? : ")
-        else
+        } else {
             hostIP = args[0]
-        new NodeRun(hostIP).invoke()
+            // pass node IP in the second argument
+            if (args.size() > 1) {
+                nodeIP = args[1]
+            }
+        }
+        println "Running node on host $hostIP with IP $nodeIP"
+        if (nodeIP == null) {
+            new NodeRun(hostIP).invoke()
+        }
+        else {
+            new NodeRun(hostIP, nodeIP).invoke()
+        }
     }
 }
