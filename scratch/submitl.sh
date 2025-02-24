@@ -31,4 +31,4 @@ cpus_per_task=$((cpus_per_task > 32 ? 32 : cpus_per_task))
 
 module load apps/java/21.0.2/noarch
 
-sbatch --job-name="$1" -D /users/40536446/ParallelSQL --output="$1".out --mail-user="40536446@napier.ac.uk" --mail-type=ALL --exclusive --time=45 --ntasks=$total_nodes --nodes=$total_nodes --nodelist node[02-"$(printf "%02d" $end_node)"] --cpus-per-task=$cpus_per_task ./multirunl.sh "$1"
+sbatch --job-name="$1" -D /users/40536446/ParallelSQL --output="$1".out --mail-user="40536446@napier.ac.uk" --mail-type=ALL --time=45 --ntasks=$total_nodes --nodes=$total_nodes --nodelist node[02-"$(printf "%02d" $end_node)"] --cpus-per-task=$cpus_per_task ./multirunl.sh "$1"
